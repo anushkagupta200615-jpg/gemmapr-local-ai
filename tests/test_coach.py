@@ -61,3 +61,22 @@ def test_negotiation_logged(tmp_path):
     s = _make_store(tmp_path)
     Coach(MockProvider()).negotiate("anything", "medium", GOALS, s)
     assert len(s.negotiations()) == 1
+
+
+def test_string_conceded_false_never_unlocks_the_gate(tmp_path):
+    """Strict JSON contract: concede must be a real boolean.
+
+    The string "false" is truthy under bool() — before the fix, a model (or
+    client history) replying with "false" made the coach skip the chore and
+    report a release that was never earned.
+    """
+    s = _make_store(tmp_path)
+
+    class FakeProvider:
+        def bouncer_turn(self, system, history, user_message):
+            return {"concede": "false", "message": "sure"}
+
+    out = Coach(FakeProvider()).negotiate("come on, five minutes", "hard", GOALS, s)
+    assert out.concede is False
+    assert out.chore in PENALTY_CHORES  # held the line: chore assigned
+    assert len(s.open_chores()) == 1

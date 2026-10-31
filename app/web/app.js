@@ -72,8 +72,15 @@ function renderState(s) {
     gl.innerHTML = "";
     (s.goals || []).forEach((g) => {
       const li = document.createElement("li");
-      li.innerHTML = `<span class="${g.done ? "done" : ""}">${g.title}</span>
-        <span class="t">${g.difficulty} · ${g.minutes}m</span>`;
+      // model/user-derived text is rendered as TEXT, never markup: goal
+      // titles could otherwise run script inside the local app
+      const title = document.createElement("span");
+      if (g.done) title.className = "done";
+      title.textContent = g.title;
+      const meta = document.createElement("span");
+      meta.className = "t";
+      meta.textContent = `${g.difficulty} · ${g.minutes}m`;
+      li.append(title, meta);
       gl.appendChild(li);
     });
     if (!(s.goals || []).length) gl.innerHTML = "<li><i>no goals yet — set one</i></li>";
@@ -85,8 +92,16 @@ function renderState(s) {
     tl.innerHTML = "";
     (s.recent_verdicts || []).forEach((v) => {
       const li = document.createElement("li");
-      li.innerHTML = `<span class="s-${v.state}">${v.state}</span>
-        <span>${v.summary || "—"}</span><span class="t">${fmtTime(v.ts)}</span>`;
+      // v.summary is model-written — render as text only
+      const st = document.createElement("span");
+      st.className = "s-" + v.state;
+      st.textContent = v.state;
+      const sum = document.createElement("span");
+      sum.textContent = v.summary || "—";
+      const t = document.createElement("span");
+      t.className = "t";
+      t.textContent = fmtTime(v.ts);
+      li.append(st, sum, t);
       tl.appendChild(li);
     });
     if (!(s.recent_verdicts || []).length) tl.innerHTML = "<li><i>no observations yet</i></li>";
@@ -98,7 +113,12 @@ function renderState(s) {
     cl.innerHTML = "";
     (s.open_chores || []).forEach((c) => {
       const li = document.createElement("li");
-      li.innerHTML = `<span>${c.title}</span><span class="t">${c.reason || "penalty"}</span>`;
+      const title = document.createElement("span");
+      title.textContent = c.title;
+      const reason = document.createElement("span");
+      reason.className = "t";
+      reason.textContent = c.reason || "penalty";
+      li.append(title, reason);
       cl.appendChild(li);
     });
     if ($("chores-empty")) {
@@ -186,9 +206,17 @@ async function journalLoop() {
     (data.timeline || []).forEach((e) => {
       const li = document.createElement("li");
       li.className = `k-${e.kind}` + (e.state ? ` state-${e.state}` : "");
-      li.innerHTML = `<div class="hl">${e.headline}</div>
-        <div class="dt">${e.detail || ""}</div>
-        <div class="t">${fmtTime(e.ts)}</div>`;
+      // model-written summaries and saved user messages render as text
+      const hl = document.createElement("div");
+      hl.className = "hl";
+      hl.textContent = e.headline;
+      const dt = document.createElement("div");
+      dt.className = "dt";
+      dt.textContent = e.detail || "";
+      const t = document.createElement("div");
+      t.className = "t";
+      t.textContent = fmtTime(e.ts);
+      li.append(hl, dt, t);
       tl.appendChild(li);
     });
     if (!(data.timeline || []).length) {

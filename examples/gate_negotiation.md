@@ -2,7 +2,7 @@
 
 Provider: **mock (deterministic rules; no model on this machine)**
 
-Pipeline: screenshots → gemma4:e2b verdicts (mock here) → policy (2-drift gate)
+Pipeline: screenshots → verdicts (mock (deterministic rules; no model on this machine)) → policy (2-drift gate)
 → bouncer persona (same model) → case-file receipts fed into every reply.
 
 ## The System is holding your screen
