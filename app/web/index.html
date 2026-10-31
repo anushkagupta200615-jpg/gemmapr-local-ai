@@ -3,71 +3,84 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Let'shack Bouncer — HUD</title>
+<title>Let'shack Bouncer — System HUD</title>
 <link rel="stylesheet" href="/static/style.css">
 </head>
 <body data-page="hud">
 <header>
-  <div class="brand">SYSTEM <span class="sub">/ attention accountability</span></div>
+  <div class="brand">SYSTEM HUD <span class="sub">/ Attention Bouncer</span></div>
   <div class="pill" id="strictness">medium</div>
 </header>
 
 <main class="grid">
+  <!-- Hunter / Avatar Card -->
   <section class="card avatar-card">
-    <div class="avatar" id="avatar">😴</div>
-    <div class="avatar-state" id="avatar-state">watch off</div>
-    <svg class="ring" viewBox="0 0 120 120" width="120" height="120" aria-hidden="true">
-      <circle class="ring-bg" cx="60" cy="60" r="52"/>
-      <circle class="ring-fg" id="xp-ring" cx="60" cy="60" r="52"/>
-    </svg>
+    <div class="avatar-container">
+      <svg class="ring" viewBox="0 0 120 120" width="120" height="120" aria-hidden="true">
+        <circle class="ring-bg" cx="60" cy="60" r="52"/>
+        <circle class="ring-fg" id="xp-ring" cx="60" cy="60" r="52"/>
+      </svg>
+      <div class="avatar" id="avatar">😴</div>
+    </div>
     <div class="xp-meta">
+      <div class="avatar-state" id="avatar-state">watch off</div>
       <div class="lvl" id="level">LEVEL 1</div>
       <div class="xpt" id="xp-total">0 XP</div>
       <div class="streak" id="focus-streak">no streak yet</div>
     </div>
   </section>
 
+  <!-- Watch Engine Control -->
   <section class="card">
-    <h2>Watch</h2>
-    <p class="hint">Watching is <b>opt-in</b>. Frame verdicts stay in a local SQLite
-    file on this machine. Nothing leaves the device; no cloud model.</p>
-    <button id="watch-toggle" class="btn">▶ Start watching</button>
-    <button id="wipe" class="btn ghost">Delete my history</button>
+    <h2>Watch Engine</h2>
+    <p class="hint">Continuous screenshot classification powered by local <b>gemma4:e2b</b>. 100% offline, zero cloud calls, deletable SQLite storage.</p>
+    <div class="row">
+      <button id="watch-toggle" class="btn">▶ Start watching</button>
+      <button id="wipe" class="btn ghost">Delete my history</button>
+    </div>
     <div id="watch-error" class="error"></div>
   </section>
 
+  <!-- Active Missions & Goals -->
   <section class="card wide">
-    <h2>Goals</h2>
+    <h2>Missions & Focus Goals</h2>
     <form id="goal-form" class="row">
-      <input id="goal-title" placeholder="e.g. Finish essay intro" required>
-      <input id="goal-minutes" type="number" min="0" value="30" title="minutes">
+      <input id="goal-title" placeholder="e.g. Finish thesis chapter draft" required>
+      <input id="goal-minutes" type="number" min="0" value="30" title="minutes" placeholder="mins">
       <select id="goal-difficulty">
-        <option value="easy">easy ·10xp</option>
-        <option value="medium" selected>medium ·25xp</option>
-        <option value="hard">hard ·60xp</option>
+        <option value="easy">Easy · 10 XP</option>
+        <option value="medium" selected>Medium · 25 XP</option>
+        <option value="hard">Hard · 60 XP</option>
       </select>
-      <button class="btn">Add</button>
+      <button class="btn">Add Mission</button>
     </form>
     <ul id="goals" class="goals"></ul>
   </section>
 
+  <!-- High Alert Gate Banner -->
   <section class="card wide gate-banner hidden" id="gate-banner">
-    🚪 The bouncer is at your screen. <a href="/gate">Face the gate →</a>
+    ⚠️ <b>SYSTEM LOCKOUT ENGAGED:</b> Drift detected. The Bouncer is holding your screen.
+    <a href="/gate">Enter The Gate →</a>
   </section>
 
+  <!-- Evidence Trail -->
   <section class="card">
-    <h2>Evidence trail</h2>
+    <h2>Evidence Trail (Receipts)</h2>
     <ul id="verdicts" class="trail"></ul>
   </section>
 
+  <!-- Penalty Zone -->
   <section class="card">
-    <h2>Penalty zone</h2>
+    <h2>Penalty Zone (Chores)</h2>
     <ul id="chores" class="trail"></ul>
-    <p class="hint" id="chores-empty">No open chores. Keep it that way.</p>
+    <p class="hint" id="chores-empty">No open chores. Stay focused to keep it empty.</p>
   </section>
 </main>
 
-<footer>gemma4:e2b · fully offline · <a href="/journal">attention story</a> · <span id="conn">live feed: connecting…</span></footer>
+<footer>
+  <div>gemma4:e2b · Local AI Engine · <a href="/journal">Attention Story Journal →</a></div>
+  <div id="conn">live feed: connecting…</div>
+</footer>
 <script src="/static/app.js"></script>
 </body>
 </html>
