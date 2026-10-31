@@ -137,7 +137,24 @@ def run() -> int:
     return 0
 
 
+def _force_utf8_console() -> None:
+    """Windows consoles default to cp1252/cp936, which choke on the unicode
+    arrows/emoji our diagnostics print. Force UTF-8 with replacement so a
+    demo run can never die on output encoding. A no-op on UTF-8 consoles.
+    """
+    for stream_name in ("stdout", "stderr"):
+        stream = getattr(sys, stream_name, None)
+        if stream is None or not getattr(stream, "encoding", None):
+            continue
+        if (stream.encoding or "").lower() not in ("utf-8", "utf8"):
+            try:
+                stream.reconfigure(encoding="utf-8", errors="replace")
+            except (AttributeError, OSError):
+                pass  # non-reconfigurable stream (e.g. pytest capture)
+
+
 def main(argv: list[str] | None = None) -> int:
+    _force_utf8_console()
     argv = argv if argv is not None else sys.argv[1:]
     if not argv or argv[0] == "selfcheck":
         return selfcheck()

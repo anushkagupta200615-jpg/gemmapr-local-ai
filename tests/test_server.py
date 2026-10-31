@@ -62,13 +62,23 @@ def test_watch_toggle_roundtrip(client):
     assert off["watch"] is False
 
 
-def test_watch_requires_real_source_when_none_injected(tmp_path):
+def test_watch_requires_real_source_when_none_injected(tmp_path, monkeypatch):
+    """Refusal contract, platform-neutral: when get_source() cannot produce a
+    capture source (headless Linux, Wayland, broken mss), /api/watch must
+    answer 400 with the fix instructions — on any OS. (The old version only
+    passed on our headless Linux dev box: on Windows there IS a display, and
+    mss initialises fine, so real capture legitimately succeeds there.)"""
     engine = Engine(
         settings=Settings(), store=Store(tmp_path / "t.db"), provider=MockProvider()
     )
+
+    def no_capture():
+        raise RuntimeError("no capture source on this machine (test stub)")
+
+    monkeypatch.setattr("app.capture.get_source", no_capture)
     with TestClient(create_app(engine)) as tc:
         r = tc.post("/api/watch", json={"on": True})
-        assert r.status_code == 400  # headless box has no display: refused loudly
+        assert r.status_code == 400  # capture refusal surfaces as a loud 400
 
 
 def test_negotiation_via_api(client):
