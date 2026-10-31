@@ -5,3 +5,5 @@ pillow>=10.0.0
 
 # Tests / dev
 -r requirements-dev.txt
+fastapi>=0.110
+uvicorn>=0.29

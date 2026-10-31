@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Let'shack Bouncer — HUD</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body data-page="hud">
+<header>
+  <div class="brand">SYSTEM <span class="sub">/ attention accountability</span></div>
+  <div class="pill" id="strictness">medium</div>
+</header>
+
+<main class="grid">
+  <section class="card avatar-card">
+    <div class="avatar" id="avatar">😴</div>
+    <div class="avatar-state" id="avatar-state">watch off</div>
+    <svg class="ring" viewBox="0 0 120 120" width="120" height="120" aria-hidden="true">
+      <circle class="ring-bg" cx="60" cy="60" r="52"/>
+      <circle class="ring-fg" id="xp-ring" cx="60" cy="60" r="52"/>
+    </svg>
+    <div class="xp-meta">
+      <div class="lvl" id="level">LEVEL 1</div>
+      <div class="xpt" id="xp-total">0 XP</div>
+      <div class="streak" id="focus-streak">no streak yet</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Watch</h2>
+    <p class="hint">Watching is <b>opt-in</b>. Frame verdicts stay in a local SQLite
+    file on this machine. Nothing leaves the device; no cloud model.</p>
+    <button id="watch-toggle" class="btn">▶ Start watching</button>
+    <button id="wipe" class="btn ghost">Delete my history</button>
+    <div id="watch-error" class="error"></div>
+  </section>
+
+  <section class="card wide">
+    <h2>Goals</h2>
+    <form id="goal-form" class="row">
+      <input id="goal-title" placeholder="e.g. Finish essay intro" required>
+      <input id="goal-minutes" type="number" min="0" value="30" title="minutes">
+      <select id="goal-difficulty">
+        <option value="easy">easy ·10xp</option>
+        <option value="medium" selected>medium ·25xp</option>
+        <option value="hard">hard ·60xp</option>
+      </select>
+      <button class="btn">Add</button>
+    </form>
+    <ul id="goals" class="goals"></ul>
+  </section>
+
+  <section class="card wide gate-banner hidden" id="gate-banner">
+    🚪 The bouncer is at your screen. <a href="/gate">Face the gate →</a>
+  </section>
+
+  <section class="card">
+    <h2>Evidence trail</h2>
+    <ul id="verdicts" class="trail"></ul>
+  </section>
+
+  <section class="card">
+    <h2>Penalty zone</h2>
+    <ul id="chores" class="trail"></ul>
+    <p class="hint" id="chores-empty">No open chores. Keep it that way.</p>
+  </section>
+</main>
+
+<footer>gemma4:e2b · fully offline · <span id="conn">live feed: connecting…</span></footer>
+<script src="/static/app.js"></script>
+</body>
+</html>
