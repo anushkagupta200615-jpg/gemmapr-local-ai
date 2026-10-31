@@ -174,6 +174,29 @@ async function hudInit() {
   setInterval(hudLoop, 3000); // heartbeat in addition to WS pushes
 }
 
+/* ---------------- Journal (attention story) ---------------- */
+
+async function journalLoop() {
+  try {
+    const data = await api("/api/journal");
+    if ($("xp-total")) $("xp-total").textContent = data.total_xp + " XP";
+    const tl = $("timeline");
+    if (!tl) return;
+    tl.innerHTML = "";
+    (data.timeline || []).forEach((e) => {
+      const li = document.createElement("li");
+      li.className = `k-${e.kind}` + (e.state ? ` state-${e.state}` : "");
+      li.innerHTML = `<div class="hl">${e.headline}</div>
+        <div class="dt">${e.detail || ""}</div>
+        <div class="t">${fmtTime(e.ts)}</div>`;
+      tl.appendChild(li);
+    });
+    if (!(data.timeline || []).length) {
+      tl.innerHTML = "<li><i>an empty story — start watching from the HUD</i></li>";
+    }
+  } catch (_) {}
+}
+
 /* ---------------- Gate ---------------- */
 
 function gateMsg(text, me) {
@@ -216,3 +239,4 @@ async function gateInit() {
 
 if (page === "hud") hudInit();
 if (page === "gate") gateInit();
+if (page === "journal") { journalLoop(); setInterval(journalLoop, 4000); }

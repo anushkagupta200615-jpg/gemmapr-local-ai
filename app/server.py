@@ -92,7 +92,6 @@ def create_app(engine: Engine) -> FastAPI:
             "open_chores": engine.store.open_chores(),
             "recent_verdicts": engine.store.verdicts(limit=8),
             "negotiations": engine.store.negotiations(limit=5),
-            "session": engine.__class__.__name__,
         }
 
     @app.get("/api/goals")
@@ -155,7 +154,59 @@ def create_app(engine: Engine) -> FastAPI:
         history = body.get("history") or None
         return engine.negotiate(message, history=history)
 
+    @app.get("/history/journal")
+    @app.get("/journal")
+    def journal() -> FileResponse:
+        return FileResponse(WEB_DIR / "journal.html")
+
     # ---- evidence trail + privacy switch ----
+
+    @app.get("/api/journal")
+    def api_journal() -> dict[str, Any]:
+        """The attention story, one timeline: verdicts, gate moments,
+        negotiations, XP awards, chores — merged and time-sorted."""
+        items: list[dict[str, Any]] = []
+        for v in engine.store.verdicts(limit=200):
+            items.append(
+                {
+                    "ts": v["ts"],
+                    "kind": "verdict",
+                    "headline": {
+                        "on_track": "🎯 focused",
+                        "drift": "🌀 drifted",
+                        "break": "☕ break",
+                        "unknown": "❔ unclear",
+                    }.get(v["state"], v["state"]),
+                    "detail": f"{v['summary'] or '—'} ({v['category'] or 'other'})",
+                    "state": v["state"],
+                }
+            )
+        for n in engine.store.negotiations(limit=50):
+            items.append(
+                {
+                    "ts": n["ts"],
+                    "kind": "negotiation",
+                    "headline": "🚪 you said"
+                    if not n["conceded"]
+                    else "🫱 you argued",
+                    "detail": f"“{n['user']}” → "
+                    + ("released" if n["conceded"] else "held + chore")
+                    + (f" · chore: {n['chore']}" if n["chore"] else ""),
+                }
+            )
+        for x in engine.store.conn.execute(
+            "SELECT ts, amount, reason FROM xp ORDER BY xp_id DESC LIMIT 50"
+        ):
+            items.append(
+                {
+                    "ts": x["ts"],
+                    "kind": "xp",
+                    "headline": f"⭐ +{x['amount']} XP",
+                    "detail": x["reason"],
+                }
+            )
+        items.sort(key=lambda e: e["ts"], reverse=True)
+        return {"timeline": items, "total_xp": engine.store.xp_total()}
 
     @app.get("/api/history")
     def api_history() -> dict[str, Any]:

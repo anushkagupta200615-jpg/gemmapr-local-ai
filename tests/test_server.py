@@ -105,3 +105,24 @@ def test_ws_pushes_verdict_event(client):
             if event["type"] == "verdict":
                 break
         assert "verdict" in types
+
+
+def test_journal_page_and_api(client):
+    assert client.get("/journal").status_code == 200
+    client.store.add_goal("Essay", minutes=0, difficulty="medium")
+    client.engine.enable_watch(client.engine.source)
+    client.engine.tick(now=10.0)   # on_track → focus block starts
+    client.engine.tick(now=20.0)   # break → block ends → XP awarded
+    client.engine.disable_watch()
+    client.post("/api/negotiate", json={"message": "quick coffee break?"})
+    j = client.get("/api/journal").json()
+    kinds = [e["kind"] for e in j["timeline"]]
+    assert "verdict" in kinds and "negotiation" in kinds and "xp" in kinds
+    # newest first
+    ts_list = [e["ts"] for e in j["timeline"]]
+    assert ts_list == sorted(ts_list, reverse=True)
+
+
+def test_journal_empty_is_honest(client):
+    j = client.get("/api/journal").json()
+    assert j["timeline"] == [] and j["total_xp"] == 0
