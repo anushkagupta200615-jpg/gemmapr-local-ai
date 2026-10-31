@@ -80,7 +80,7 @@ CI and the dev box run with a deterministic **mock provider** (`SKIP_MODEL_TESTS
 - `src-tauri/` — display shell (two windows; engine stays user-launched)
 - `examples/` — real engine-run artifacts + the one-command generator
 - `DEMO.md` — the 5-minute judge script · `docs/laptop.md` — stage runbook (Linux/X11) · `docs/laptop-windows.md` — stage runbook (Windows)
-- `tests/` — 56 pytest tests, fully headless
+- `tests/` — 70 pytest tests, fully headless
 - `.github/workflows/ci.yml` — `pip install` + `pytest` per PR (all changes
   land through PRs, per hackathon rules)
 
