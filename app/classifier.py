@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import json
+from urllib.parse import urlsplit
 from typing import Any
 
 from .models import Classification, Frame, Goal
@@ -104,6 +105,15 @@ class OllamaProvider(VerdictProvider):
     name = "ollama"
 
     def __init__(self, model: str = "gemma4:e2b", base_url: str = "http://127.0.0.1:11434"):
+        # Premise: raw frames never leave this device. A remote model host is
+        # refused loudly at construction time — before a single capture runs.
+        host = (urlsplit(base_url).hostname or "").lower()
+        if host not in ("127.0.0.1", "localhost", "::1"):
+            raise ValueError(
+                "LETCHACK_OLLAMA_URL must point at this machine (loopback "
+                f"127.0.0.1/localhost/::1 only — screenshots must never leave "
+                f"the device); got {base_url!r}"
+            )
         self.model = model
         self.base_url = base_url.rstrip("/")
 
@@ -199,6 +209,10 @@ class OllamaProvider(VerdictProvider):
             try:
                 conf = float(item.get("confidence", 0.0))
             except (TypeError, ValueError):
+                conf = 0.0
+            # non-finite (e.g. 1e999 -> inf) or out-of-range confidence must
+            # not poison /api/state JSON encoding — that freezes the HUD
+            if not 0.0 <= conf <= 1.0:
                 conf = 0.0
             out.append(
                 Classification(

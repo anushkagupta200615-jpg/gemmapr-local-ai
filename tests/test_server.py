@@ -126,3 +126,42 @@ def test_journal_page_and_api(client):
 def test_journal_empty_is_honest(client):
     j = client.get("/api/journal").json()
     assert j["timeline"] == [] and j["total_xp"] == 0
+
+
+def test_goal_minutes_validation(client):
+    # non-numeric minutes -> 422 validation error, not a crashing 500
+    r = client.post("/api/goals", json={"title": "Essay", "minutes": "abc", "difficulty": "medium"})
+    assert r.status_code == 422
+    r = client.post("/api/goals", json={"title": "Essay", "minutes": True})
+    assert r.status_code == 422
+    # a valid ZERO-minute goal stays zero (no `or 30` coercion)
+    client.post("/api/goals", json={"title": "Zero-Sprint", "minutes": 0, "difficulty": "medium"})
+    zero = [g for g in client.get("/api/goals").json()["goals"] if g["title"] == "Zero-Sprint"]
+    assert zero and zero[0]["minutes"] == 0
+
+
+def test_watch_toggle_string_false_is_off(client):
+    # strict boolean contract: the string "false" must not switch watching on
+    r = client.post("/api/watch", json={"on": "false"})
+    assert r.json()["watch"] is False
+    assert client.get("/api/state").json()["watch_on"] is False
+
+
+def test_boot_with_watch_enabled_starts_watcher(tmp_path):
+    """LETCHACK_WATCH=1 flow: engine pre-enabled at boot -> the watcher must
+    actually run, not just display 'Stop watching' while nothing captures."""
+    import time as _time
+
+    store = Store(tmp_path / "w.db")
+    engine = Engine(
+        settings=Settings(screenshot_interval_sec=0.5, dedupe_frames=False),
+        store=store,
+        provider=MockProvider(),
+    )
+    engine.enable_watch(FakeSource(["VS Code - a.py"]))
+    events: list = []
+    engine.subscribe(events.append)
+    with TestClient(create_app(engine)) as tc:
+        _time.sleep(2.6)  # first watcher tick lands at ~2s
+    # at least one real verdict event came from the background watcher
+    assert any(e.get("type") == "verdict" for e in events)

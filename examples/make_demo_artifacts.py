@@ -29,7 +29,7 @@ sys.path.insert(0, str(REPO))
 os.environ.setdefault("LETCHACK_MOCK", "1")
 
 from app.capture import FakeSource  # noqa: E402
-from app.classifier import MockProvider  # noqa: E402
+from app.classifier import MockProvider, OllamaProvider  # noqa: E402
 from app.config import Settings  # noqa: E402
 from app.engine import Engine  # noqa: E402
 from app.store import Store  # noqa: E402
@@ -40,13 +40,22 @@ def main() -> int:
     out_dir = Path(__file__).resolve().parent
     tmp = tempfile.mkdtemp(prefix="letshack-examples-")
 
+    settings = Settings.from_env()  # honours LETCHACK_MOCK=0 for real-model runs
+    if settings.mock_model:
+        provider = MockProvider()
+        provider_name = "mock (deterministic rules; no model on this machine)"
+    else:
+        provider = OllamaProvider(
+            model=settings.model, base_url=settings.ollama_base_url
+        )
+        provider_name = f"ollama:{settings.model} (real gemma4:e2b)"
+
     store = Store(os.path.join(tmp, "session.db"))
     engine = Engine(
-        settings=Settings(strictness="medium"),
+        settings=settings,
         store=store,
-        provider=MockProvider(),
+        provider=provider,
     )
-    provider_name = "mock (deterministic rules; no model on this machine)"
 
     store.add_goal("Warm-up sprint: outline notes", minutes=0, difficulty="easy")
     store.add_goal("Finish essay introduction", minutes=30, difficulty="medium")
@@ -133,22 +142,22 @@ def main() -> int:
         "",
         f"Provider: **{provider_name}**",
         "",
-        "Pipeline: screenshots → gemma4:e2b verdicts (mock here) → policy (2-drift gate)",
+        f"Pipeline: screenshots → verdicts ({provider_name}) → policy (2-drift gate)",
         "→ bouncer persona (same model) → case-file receipts fed into every reply.",
         "",
         "## The System is holding your screen",
         "",
         "**Student:** come on, just five more minutes of youtube, i'm basically studying",
         "",
-        f"**System:** {nego_1["message"]}",
+        f"**System:** {nego_1['message']}",
         "",
-        f"*(conceded: {str(nego_1["concede"]).lower()})*",
+        f"*(conceded: {str(nego_1['concede']).lower()})*",
         "",
         "**Student:** ok ok, you're right. back to the essay now.",
         "",
-        f"**System:** {nego_2["message"]}",
+        f"**System:** {nego_2['message']}",
         "",
-        f"*(conceded: {str(nego_2["concede"]).lower()})*",
+        f"*(conceded: {str(nego_2['concede']).lower()})*",
         "",
         "## Case-file receipts the System used (store.drifts/negotiations)",
         "",
@@ -200,7 +209,7 @@ def main() -> int:
         )
         + "\n"
     )
-    print("examples/ regenerated from a real engine run (mock provider)")
+    print(f"examples/ regenerated from a real engine run ({provider_name})")
     return 0
 
 

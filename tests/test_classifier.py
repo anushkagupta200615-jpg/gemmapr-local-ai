@@ -83,3 +83,47 @@ def test_ollamaprovider_bouncer_json(monkeypatch):
     payload = provider.bouncer_turn("system prompt", [], "just 5 minutes")
     assert payload["concede"] is False
     assert "System" in payload["message"]
+
+
+# ----- OllamaProvider: frames-never-leave-device guard -----
+
+
+def test_ollamaprovider_rejects_non_loopback_url():
+    # A remote model host would receive raw screenshots: refuse at construction
+    for bad in ("http://10.0.0.5:11434", "https://api.example.com", "http://example.internal:8080"):
+        with pytest.raises(ValueError, match="loopback"):
+            OllamaProvider(base_url=bad)
+    # loopback endpoints keep working
+    OllamaProvider(base_url="http://127.0.0.1:11434")
+    OllamaProvider(base_url="http://localhost:11434")
+
+
+# ----- OllamaProvider: confidence must stay finite and in range -----
+
+
+def test_parse_confidence_non_finite_is_zero(monkeypatch):
+    provider = OllamaProvider()
+    # json.loads("1e999") -> inf; a NaN via JSON "NaN" -> nan (non-finite)
+    monkeypatch.setattr(
+        OllamaProvider, "_chat",
+        # flake8: noqa
+        lambda self, payload: _provider_resp(
+            '{"verdicts":[{"state":"drift","summary":"yt",'
+            '"confidence":1e999,"category":"video"}]}'
+        )
+    )
+    out = provider.classify_frames([_frame("YouTube")], GOALS)
+    assert out[0].confidence == 0.0
+
+
+def test_parse_confidence_out_of_range_is_zero(monkeypatch):
+    provider = OllamaProvider()
+    monkeypatch.setattr(
+        OllamaProvider, "_chat",
+        lambda self, payload: _provider_resp(
+            '{"verdicts":[{"state":"drift","summary":"yt",'
+            '"confidence":42.0,"category":"video"}]}'
+        )
+    )
+    out = provider.classify_frames([_frame("YouTube")], GOALS)
+    assert out[0].confidence == 0.0
