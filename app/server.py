@@ -87,7 +87,11 @@ def create_app(engine: Engine) -> FastAPI:
         return {
             "watch_on": engine.watch_on,
             "gate_open": engine.policy.gate_open,
+            "drift_streak": engine.policy.drift_streak,
+            "drift_threshold": engine.policy.threshold(),
             "strictness": engine.policy.strictness,
+            "capture_interval_sec": max(2.0, engine.settings.screenshot_interval_sec),
+            "model_name": engine.settings.model if not engine.settings.mock_model else "mock provider",
             "xp_total": total,
             "level": level_for(total),
             "xp_into_level": into,

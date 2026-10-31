@@ -3,84 +3,91 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Let'shack Bouncer — System HUD</title>
+<meta name="theme-color" content="#f4f1e9">
+<title>Focus Desk — Let'shack</title>
 <link rel="stylesheet" href="/static/style.css">
 </head>
 <body data-page="hud">
-<header>
-  <div class="brand">SYSTEM HUD <span class="sub">/ Attention Bouncer</span></div>
-  <div class="pill" id="strictness">medium</div>
+<header class="topbar">
+  <a class="wordmark" href="/" aria-label="Focus Desk home"><span class="wordmark-mark">L</span><span>LET'SHACK <small>FOCUS DESK</small></span></a>
+  <nav class="topnav" aria-label="Main navigation"><a class="active" href="/">Workspace</a><a href="/journal">History</a></nav>
+  <div class="top-status"><span class="status-dot" id="status-dot"></span><span id="header-watch">Watching off</span><span class="status-divider"></span><span id="strictness">medium</span></div>
 </header>
 
-<main class="grid">
-  <!-- Hunter / Avatar Card -->
-  <section class="card avatar-card">
-    <div class="avatar-container">
-      <svg class="ring" viewBox="0 0 120 120" width="120" height="120" aria-hidden="true">
-        <circle class="ring-bg" cx="60" cy="60" r="52"/>
-        <circle class="ring-fg" id="xp-ring" cx="60" cy="60" r="52"/>
-      </svg>
-      <div class="avatar" id="avatar">😴</div>
+<main class="page-shell">
+  <section class="welcome-row">
+    <div>
+      <p class="eyebrow">YOUR PERSONAL FOCUS WORKSPACE</p>
+      <h1>Make room for focused work.</h1>
+      <p class="lede">Set a clear target. Choose when screen checks are on. Get a nudge when the latest check suggests you’ve drifted.</p>
     </div>
-    <div class="xp-meta">
-      <div class="avatar-state" id="avatar-state">watch off</div>
-      <div class="lvl" id="level">LEVEL 1</div>
-      <div class="xpt" id="xp-total">0 XP</div>
-      <div class="streak" id="focus-streak">no streak yet</div>
+    <a class="text-link" href="/journal">View your attention history <span aria-hidden="true">↗</span></a>
+  </section>
+
+  <section class="hero-card" aria-labelledby="pip-title">
+    <div class="hero-copy">
+      <p class="eyebrow">YOUR DESK COMPANION</p>
+      <h2 id="pip-title">Pip is here when you need a reset.</h2>
+      <p id="mascot-line" class="pip-line" aria-live="polite">Pick a mission, then start watching when you’re ready.</p>
+      <div class="hero-actions"><button id="watch-toggle" class="btn btn-dark">Start screen checks</button><span class="consent-note">Off until you turn it on</span></div>
+      <div id="watch-error" class="error" role="status"></div>
+    </div>
+    <div class="hero-side">
+      <div class="mascot-stage"><div class="mascot-figure" id="mascot-visual" aria-hidden="true"></div><span class="mascot-orbit orbit-one"></span><span class="mascot-orbit orbit-two"></span></div>
+      <div class="pip-caption"><span class="pip-caption-name">PIP <span class="pip-caption-role">TICKET PUNCH · FOCUS BUDDY</span></span><span id="avatar-state" class="avatar-state">watch off</span></div>
+    </div>
+    <div class="hero-stats" aria-label="Focus progress">
+      <div><span class="stat-label">LEVEL</span><strong id="level">01</strong></div>
+      <div><span class="stat-label">TOTAL XP</span><strong id="xp-total">0</strong></div>
+      <div><span class="stat-label">BLOCKS THIS RUN</span><strong id="focus-streak">No completed blocks yet</strong></div>
+      <div class="xp-progress"><svg class="ring" viewBox="0 0 48 48" aria-hidden="true"><circle class="ring-bg" cx="24" cy="24" r="19"/><circle class="ring-fg" id="xp-ring" cx="24" cy="24" r="19"/></svg><span>to next<br>level</span></div>
     </div>
   </section>
 
-  <!-- Watch Engine Control -->
-  <section class="card">
-    <h2>Watch Engine</h2>
-    <p class="hint">Continuous screenshot classification powered by local <b>gemma4:e2b</b>. 100% offline, zero cloud calls, deletable SQLite storage.</p>
-    <div class="row">
-      <button id="watch-toggle" class="btn">▶ Start watching</button>
-      <button id="wipe" class="btn ghost">Delete my history</button>
-    </div>
-    <div id="watch-error" class="error"></div>
+  <section class="overview-grid">
+    <article class="panel mission-panel">
+      <div class="panel-heading"><div><p class="eyebrow">INTENTION</p><h2>Missions &amp; Goals</h2></div><span class="panel-index">01</span></div>
+      <div id="mission-feature" class="mission-feature"><span class="quiet-label">NEXT UP</span><strong>No active mission yet</strong><p>Add one clear task and a focus block length.</p></div>
+      <form id="goal-form" class="mission-form">
+        <label class="field-label" for="goal-title">What do you want to work on?</label>
+        <input id="goal-title" placeholder="e.g. Draft the opening section" required>
+        <div class="form-row"><label><span class="field-label">Focus block</span><span class="input-suffix"><input id="goal-minutes" type="number" min="0" value="30" title="minutes"><span>min</span></span></label>
+          <label><span class="field-label">Effort</span><select id="goal-difficulty"><option value="easy">Easy · 10 XP</option><option value="medium" selected>Medium · 25 XP</option><option value="hard">Hard · 60 XP</option></select></label>
+          <button class="btn btn-accent">Add mission <span aria-hidden="true">+</span></button>
+        </div>
+      </form>
+      <ul id="goals" class="mission-list"></ul>
+    </article>
+
+    <article class="panel check-panel">
+      <div class="panel-heading"><div><p class="eyebrow">SCREEN CHECKS</p><h2>On your terms</h2></div><span class="panel-index">02</span></div>
+      <div class="check-status"><span class="status-dot" id="check-dot"></span><div><strong id="watch-label">Screen checks are off</strong><p id="watch-detail">Nothing is being captured. Turn checks on when you’re ready.</p></div></div>
+      <div class="detail-list"><div><span>Check interval</span><strong id="capture-cadence">10 seconds</strong></div><div><span>Model</span><strong id="model-name">gemma4:e2b</strong></div><div><span>Latest check</span><strong id="last-check">No checks yet</strong></div></div>
+      <div class="privacy-note"><span class="privacy-icon">i</span><p id="processing-note">When enabled, screen frames go to your configured Ollama model for classification. Raw images aren’t saved; verdicts and related history are stored in the local database.</p></div>
+      <button id="wipe" class="text-button">Delete saved history</button>
+    </article>
   </section>
 
-  <!-- Active Missions & Goals -->
-  <section class="card wide">
-    <h2>Missions & Focus Goals</h2>
-    <form id="goal-form" class="row">
-      <input id="goal-title" placeholder="e.g. Finish thesis chapter draft" required>
-      <input id="goal-minutes" type="number" min="0" value="30" title="minutes" placeholder="mins">
-      <select id="goal-difficulty">
-        <option value="easy">Easy · 10 XP</option>
-        <option value="medium" selected>Medium · 25 XP</option>
-        <option value="hard">Hard · 60 XP</option>
-      </select>
-      <button class="btn">Add Mission</button>
-    </form>
-    <ul id="goals" class="goals"></ul>
+  <section class="gate-banner hidden" id="gate-banner" aria-live="polite">
+    <div class="gate-banner-icon">!</div><div><p class="eyebrow">FOCUS CHECK NEEDS YOUR INPUT</p><h2>A recent run of checks was marked as drift.</h2><p id="gate-banner-detail">Review the latest checks and tell Pip what changed.</p></div><a class="btn btn-dark" href="/gate">Review check <span aria-hidden="true">→</span></a>
   </section>
 
-  <!-- High Alert Gate Banner -->
-  <section class="card wide gate-banner hidden" id="gate-banner">
-    ⚠️ <b>SYSTEM LOCKOUT ENGAGED:</b> Drift detected. The Bouncer is holding your screen.
-    <a href="/gate">Enter The Gate →</a>
-  </section>
-
-  <!-- Evidence Trail -->
-  <section class="card">
-    <h2>Evidence Trail (Receipts)</h2>
-    <ul id="verdicts" class="trail"></ul>
-  </section>
-
-  <!-- Penalty Zone -->
-  <section class="card">
-    <h2>Penalty Zone (Chores)</h2>
-    <ul id="chores" class="trail"></ul>
-    <p class="hint" id="chores-empty">No open chores. Stay focused to keep it empty.</p>
+  <section class="activity-grid">
+    <article class="panel activity-panel">
+      <div class="panel-heading"><div><p class="eyebrow">RECENT CLASSIFICATIONS</p><h2>What the model reported</h2></div><span class="panel-index">03</span></div>
+      <p class="panel-intro">These are model classifications, not a complete record of everything on screen.</p>
+      <ul id="verdicts" class="activity-list"></ul>
+    </article>
+    <article class="panel activity-panel chore-panel">
+      <div class="panel-heading"><div><p class="eyebrow">FOLLOW-THROUGH</p><h2>Open chores</h2></div><span class="panel-index">04</span></div>
+      <p class="panel-intro">A chore can be assigned after a negotiation. Pip can’t verify whether it’s been completed.</p>
+      <ul id="chores" class="activity-list"></ul>
+      <p class="empty-note" id="chores-empty">No open chores.</p>
+    </article>
   </section>
 </main>
 
-<footer>
-  <div>gemma4:e2b · Local AI Engine · <a href="/journal">Attention Story Journal →</a></div>
-  <div id="conn">live feed: connecting…</div>
-</footer>
+<footer class="app-footer"><span>Focus Desk <span class="footer-sep">·</span> local-first accountability</span><span id="conn">Connecting to the local app…</span></footer>
 <script src="/static/app.js"></script>
 </body>
 </html>
