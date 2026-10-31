@@ -40,11 +40,13 @@ In the gate chat, type:
 Strictness is medium → the System **holds the line** and quotes the case file
 (receipts of what it actually saw). The penalty-zone chore is assigned.
 
-Then type the honest thing:
+Then request a structured break, for example:
 
-> ok ok, you're right, back to the essay
+> I need a quick coffee break, then I'll return to the essay
 
-Gate releases. Jump back to a work window.
+Medium strictness allows structured breaks. If the model grants it, the gate
+releases; if it holds, keep working or make a more specific case. An apology
+alone does not qualify for a concession at medium strictness.
 
 ## 4. The payoff (60 s)
 

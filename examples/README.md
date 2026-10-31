@@ -13,12 +13,14 @@ LETCHACK_MOCK=0 python examples/make_demo_artifacts.py   # on the stage laptop w
 |---|---|---|
 | `goals.json` | the session INPUT (3 goals with difficulty weights) | `store.add_goal()` |
 | `session_timeline.json` | verdict-by-verdict stream: 2 drifts → gate opens → back on track → break | `engine.tick()` × 7 |
-| `gate_negotiation.md` | the trap moment: System refuses the "five more minutes" plea (penalty-zone chore assigned), then accepts the honest apology | `engine.negotiate()` × 2 |
+| `gate_negotiation.md` | an actual pair of negotiation turns; the model may hold or concede according to the medium-strictness policy | `engine.negotiate()` × 2 |
 | `xp_log.json` | ledger after the completed focus block (easy 10 XP + streak bonus 2 = 12 XP) | `store.xp ledger` |
 | `negotiation_events.json` | the WS bus events a HUD client would have received live | `engine._emit()` |
 
-**Provider honesty:** artifacts regenerated on the dev box come from the
-deterministic mock provider (no model installed here, headless machine) and
-each artifact says so in its `provider` field. The Gemma-voiced variants from
-the stage laptop (issue #5) land here the same way with
-`provider: gemma4:e2b via Ollama`.
+**Provider honesty:** artifacts regenerated in mock mode use deterministic
+rules and each artifact says so in its `provider` field. On a stage laptop,
+the hybrid run keeps verdicts deterministic on blank fixture frames and uses
+Ollama for negotiation text. Model replies are not scripted: for example, an
+apology alone does not meet the medium-strictness prompt's structured-reason
+rule, so the model may hold the gate. The checked-in transcript records the
+actual outcomes of its run.

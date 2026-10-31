@@ -151,7 +151,7 @@ class OllamaProvider(VerdictProvider):
                     ],
                     "stream": False,
                     "format": "json",
-                    "options": {"temperature": 0.1, "num_predict": 200},
+                    "options": {"temperature": 0.1, "num_predict": 600},
                 }
             )
             return self._parse(resp, len(frames))
@@ -174,7 +174,7 @@ class OllamaProvider(VerdictProvider):
                     ],
                     "stream": False,
                     "format": "json",
-                    "options": {"temperature": 0.6, "num_predict": 300},
+                    "options": {"temperature": 0.6, "num_predict": 800},
                 }
             )
             content = resp.get("message", {}).get("content", "") or "{}"
