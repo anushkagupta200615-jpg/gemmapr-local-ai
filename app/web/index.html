@@ -80,9 +80,10 @@
     </article>
     <article class="panel activity-panel chore-panel">
       <div class="panel-heading"><div><p class="eyebrow">FOLLOW-THROUGH</p><h2>Open chores</h2></div><span class="panel-index">04</span></div>
-      <p class="panel-intro">A chore can be assigned after a negotiation. Pip can’t verify whether it’s been completed.</p>
-      <ul id="chores" class="activity-list"></ul>
+      <p class="panel-intro">A chore may be assigned after a negotiation. Mark it done when you’ve completed it; Pip can’t verify it for you.</p>
+      <ul id="chores" class="activity-list" aria-label="Open chores"></ul>
       <p class="empty-note" id="chores-empty">No open chores.</p>
+      <p class="chore-feedback" id="chore-feedback" role="status" aria-live="polite"></p>
     </article>
   </section>
 </main>
