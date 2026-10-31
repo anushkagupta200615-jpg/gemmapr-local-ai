@@ -1,6 +1,7 @@
 """CLI entry points.
 
     python -m app selfcheck   environment diagnostics for the stage laptop
+    python -m app run         serve the real engine (HUD + gate) on :8765
     python -m app demo        tiny headless smoke run (FakeSource + MockProvider)
 Anything else prints usage.
 """
@@ -109,10 +110,39 @@ def demo() -> int:
     return 0
 
 
+def run() -> int:
+    """Serve the real engine (Ollama provider unless LETCHACK_MOCK=1)."""
+    from .classifier import MockProvider, OllamaProvider
+    from .config import Settings
+    from .engine import Engine
+    from .store import Store
+
+    s = Settings.from_env()
+    store = Store(str(s.data_dir / "letshack.db"))
+    provider = MockProvider() if s.mock_model else OllamaProvider(
+        model=s.model, base_url=s.ollama_base_url
+    )
+    engine = Engine(settings=s, store=store, provider=provider)
+    if s.watch_enabled:
+        from .capture import get_source
+
+        engine.enable_watch(get_source())
+
+    from .server import serve
+
+    print(f"Serving HUD on http://{s.host}:{s.port}/ (gate: /gate)")
+    print(f"model={provider.name}:{getattr(provider, 'model', 'mock')} "
+          f"strictness={s.normalised_strictness()} db={store.path}")
+    serve(engine)
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     argv = argv if argv is not None else sys.argv[1:]
     if not argv or argv[0] == "selfcheck":
         return selfcheck()
+    if argv and argv[0] == "run":
+        return run()
     if argv and argv[0] == "demo":
         return demo()
     print(__doc__)

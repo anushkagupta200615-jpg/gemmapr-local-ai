@@ -1,0 +1,85 @@
+{
+  "provider": "mock (deterministic rules; no model on this machine)",
+  "strictness": "medium",
+  "policy": "2 consecutive drift verdicts -> gate; 10min cooldown after negotiation",
+  "frames": [
+    {
+      "t": 1000.0,
+      "state": "on_track",
+      "summary": "vs code - essay_draft.py",
+      "category": "work",
+      "confidence": 0.9,
+      "decision": {
+        "action": "hold_silent",
+        "message": "",
+        "xp_awarded": 0,
+        "drift_streak": 0
+      }
+    },
+    {
+      "t": 1060.0,
+      "state": "on_track",
+      "summary": "google docs - essay introduction",
+      "category": "work",
+      "confidence": 0.9,
+      "decision": {
+        "action": "hold_silent",
+        "message": "",
+        "xp_awarded": 0,
+        "drift_streak": 0
+      }
+    },
+    {
+      "t": 1120.0,
+      "state": "drift",
+      "summary": "youtube - focus lofi beats mix 10 hours",
+      "category": "video/social",
+      "confidence": 0.9,
+      "decision": {
+        "action": "hold_silent",
+        "message": "drift detected (streak 1/2)",
+        "xp_awarded": 0,
+        "drift_streak": 1
+      }
+    },
+    {
+      "t": 1180.0,
+      "state": "drift",
+      "summary": "reddit - r/getstudying - top posts today",
+      "category": "video/social",
+      "confidence": 0.9,
+      "decision": {
+        "action": "open_gate",
+        "message": "2 consecutive drift verdicts (threshold 2 at strictness medium)",
+        "xp_awarded": 0,
+        "drift_streak": 2
+      }
+    },
+    {
+      "t": 1240.0,
+      "state": "on_track",
+      "summary": "google docs - essay introduction",
+      "category": "work",
+      "confidence": 0.9,
+      "decision": {
+        "action": "close_gate",
+        "message": "back on track",
+        "xp_awarded": 0,
+        "drift_streak": 0
+      }
+    },
+    {
+      "t": 1360.0,
+      "state": "break",
+      "summary": "spotify - coffee break mix",
+      "category": "other",
+      "confidence": 0.9,
+      "decision": {
+        "action": "hold_silent",
+        "message": "",
+        "xp_awarded": 0,
+        "drift_streak": 0
+      }
+    }
+  ]
+}
