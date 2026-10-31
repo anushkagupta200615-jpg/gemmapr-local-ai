@@ -1,14 +1,19 @@
 # DEMO — the 5-minute judge script (P08, Gemma track)
 
-**Machine:** the Linux laptop, X11 session, Ollama running with `gemma4:e2b`.
+**Machine:** the demo laptop with Ollama serving `gemma4:e2b` — one-time setup in
+`docs/laptop-windows.md` (Windows) or `docs/laptop.md` (Linux/X11).
 **Audience:** judges sitting at your shoulder. **Vibe:** calm, then slightly evil.
 
 ## 0. Pre-flight (quiet room, before judges arrive)
 
-```bash
-python -m app selfcheck      # session=x11 · model tag FOUND · mss yes
-python -m app run            # → Serving HUD on http://127.0.0.1:8765/
+```powershell
+.\.venv\Scripts\python -m app selfcheck   # session=windows · model tag FOUND · mss yes
+.\.venv\Scripts\python -m app run         # → Serving HUD on http://127.0.0.1:8765/
 ```
+
+Linux/X11: same commands as `python -m app selfcheck` / `python -m app run`.
+Exit code 0 from `selfcheck` = clean; fix anything it flags before opening the
+browser.
 
 Open `http://127.0.0.1:8765/` fullscreen (F11) **and** a second small window on
 `http://127.0.0.1:8765/gate`, parked in a corner (that's the bouncer — it
@@ -66,6 +71,8 @@ alone does not qualify for a concession at medium strictness.
 ## Failsafes
 
 - `ollama` hiccup: verdicts degrade to `unknown` (never lie), engine keeps running.
-- Capture broken: `selfcheck` prints exactly what's wrong (Wayland? `XDG_SESSION_TYPE`?).
+- Capture broken: `selfcheck` prints exactly what's wrong — Linux: see
+  `XDG_SESSION_TYPE` (Wayland is refused); Windows: browser over RDP, or display
+  scaling not 100%.
 - Browser issue: `python -m app demo` runs the whole pipeline headlessly and
   prints the verdict stream — still a demo.

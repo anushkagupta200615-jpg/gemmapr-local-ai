@@ -89,7 +89,9 @@ def main() -> int:
         provider=provider,
     )
 
-    store.add_goal("Warm-up sprint: outline notes", minutes=0, difficulty="easy")
+    # 2 minutes = the scripted timeline's actual on-track span (t=1240 → 1360),
+    # so the awarded block threshold reads honestly in the ledger
+    store.add_goal("Warm-up sprint: outline notes", minutes=2, difficulty="easy")
     store.add_goal("Finish essay introduction", minutes=30, difficulty="medium")
     store.add_goal("Clean up project notes", minutes=15, difficulty="easy")
 
@@ -141,7 +143,7 @@ def main() -> int:
             {
                 "provider": provider_name,
                 "goals": [
-                    {"title": "Warm-up sprint: outline notes", "minutes": 0,
+                    {"title": "Warm-up sprint: outline notes", "minutes": 2,
                      "difficulty": "easy"},
                     {"title": "Finish essay introduction", "minutes": 30,
                      "difficulty": "medium"},
