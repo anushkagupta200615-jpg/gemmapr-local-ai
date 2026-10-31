@@ -54,7 +54,8 @@ CREATE TABLE IF NOT EXISTS chores (
   title       TEXT NOT NULL,
   reason      TEXT NOT NULL DEFAULT '',
   assigned_at REAL NOT NULL,
-  done        INTEGER NOT NULL DEFAULT 0
+  done        INTEGER NOT NULL DEFAULT 0,
+  completed_at REAL
 );
 CREATE TABLE IF NOT EXISTS negotiations (
   negotiation_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -76,6 +77,11 @@ class Store:
         self.conn.row_factory = sqlite3.Row
         self.conn.execute("PRAGMA journal_mode=WAL")
         self.conn.executescript(_SCHEMA)
+        chore_columns = {
+            row["name"] for row in self.conn.execute("PRAGMA table_info(chores)")
+        }
+        if "completed_at" not in chore_columns:
+            self.conn.execute("ALTER TABLE chores ADD COLUMN completed_at REAL")
         self.conn.commit()
 
     # -- goals --
@@ -172,6 +178,31 @@ class Store:
 
     def open_chores(self) -> list[dict[str, Any]]:
         return [dict(r) for r in self.conn.execute("SELECT * FROM chores WHERE done=0")]
+
+    def chores(self) -> list[dict[str, Any]]:
+        """All assigned chores, including completed items kept for history."""
+        return [dict(r) for r in self.conn.execute(
+            "SELECT * FROM chores ORDER BY chore_id DESC"
+        )]
+
+    def complete_chore(self, chore_id: int) -> str:
+        """Mark an open chore complete without removing its record.
+
+        Returns ``completed``, ``already_done``, or ``not_found``.
+        """
+        cur = self.conn.execute(
+            "UPDATE chores SET done=1, completed_at=? WHERE chore_id=? AND done=0",
+            (time.time(), chore_id),
+        )
+        self.conn.commit()
+        if cur.rowcount:
+            return "completed"
+        row = self.conn.execute(
+            "SELECT done FROM chores WHERE chore_id=?", (chore_id,)
+        ).fetchone()
+        if row is None:
+            return "not_found"
+        return "already_done" if row["done"] else "not_found"
 
     # -- negotiations (case file) --
 

@@ -178,12 +178,21 @@ function renderState(s) {
     cl.innerHTML = "";
     (s.open_chores || []).forEach((c) => {
       const li = document.createElement("li");
+      const copy = document.createElement("div");
+      copy.className = "chore-copy";
       const title = document.createElement("span");
       title.textContent = c.title;
       const reason = document.createElement("span");
       reason.className = "t";
       reason.textContent = c.reason || "penalty";
-      li.append(title, reason);
+      copy.append(title, reason);
+      const complete = document.createElement("button");
+      complete.type = "button";
+      complete.className = "chore-complete";
+      complete.dataset.choreId = String(c.chore_id);
+      complete.textContent = "Mark done";
+      complete.setAttribute("aria-label", `Mark chore complete: ${c.title}`);
+      li.append(copy, complete);
       cl.appendChild(li);
     });
     if ($("chores-empty")) {
@@ -225,6 +234,7 @@ function hudEvents() {
       if (e.type === "xp") hudLoop();
       if (e.type === "negotiation") hudLoop();
       if (e.type === "watch") hudLoop();
+      if (e.type === "chore") hudLoop();
     } catch (_) {}
   };
   return ws;
@@ -257,6 +267,39 @@ async function hudInit() {
     if (!confirm("Delete every observation, verdict, decision, XP and chore record? Goals are kept.")) return;
     await api("/api/history/delete");
     hudLoop();
+  });
+  const chores = $("chores");
+  if (chores) chores.addEventListener("click", async (ev) => {
+    const button = ev.target.closest("button[data-chore-id]");
+    if (!button) return;
+    const feedback = $("chore-feedback");
+    if (feedback) {
+      feedback.classList.remove("is-error");
+      feedback.textContent = "";
+    }
+    button.disabled = true;
+    button.textContent = "Saving…";
+    try {
+      await api(`/api/chores/${encodeURIComponent(button.dataset.choreId)}/complete`, {});
+      if (feedback) feedback.textContent = "Marked done. The chore remains in your history.";
+      const item = button.closest("li");
+      if (item) item.remove();
+      if (!chores.querySelector("li") && $("chores-empty")) $("chores-empty").style.display = "block";
+      await hudLoop();
+      const next = chores.querySelector("button[data-chore-id]");
+      if (next) next.focus();
+      else if ($("chores-empty")) {
+        $("chores-empty").tabIndex = -1;
+        $("chores-empty").focus();
+      }
+    } catch (e) {
+      button.disabled = false;
+      button.textContent = "Mark done";
+      if (feedback) {
+        feedback.classList.add("is-error");
+        feedback.textContent = `Could not update chore: ${e.message}`;
+      }
+    }
   });
   connectWS();
   await hudLoop();

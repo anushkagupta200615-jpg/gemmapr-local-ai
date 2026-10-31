@@ -159,6 +159,15 @@ def create_app(engine: Engine) -> FastAPI:
         _stop_watcher()
         return {"watch": False}
 
+    @app.post("/api/chores/{chore_id}/complete")
+    def api_complete_chore(chore_id: int) -> dict[str, Any]:
+        result = engine.store.complete_chore(chore_id)
+        if result == "not_found":
+            raise HTTPException(404, "open chore not found")
+        if result == "completed":
+            _broadcast({"type": "chore", "chore_id": chore_id})
+        return {"completed": True, "already_completed": result == "already_done"}
+
     # ---- negotiation (the gate's core moment) ----
 
     @app.post("/api/negotiate")
@@ -220,6 +229,16 @@ def create_app(engine: Engine) -> FastAPI:
                     "detail": x["reason"],
                 }
             )
+        for chore in engine.store.chores():
+            if chore["done"] and chore["completed_at"] is not None:
+                items.append(
+                    {
+                        "ts": chore["completed_at"],
+                        "kind": "chore",
+                        "headline": "chore completed",
+                        "detail": chore["title"],
+                    }
+                )
         items.sort(key=lambda e: e["ts"], reverse=True)
         return {"timeline": items, "total_xp": engine.store.xp_total()}
 
@@ -238,6 +257,7 @@ def create_app(engine: Engine) -> FastAPI:
                     "SELECT * FROM xp ORDER BY xp_id DESC LIMIT 50"
                 )
             ],
+            "chores": engine.store.chores(),
         }
 
     @app.post("/api/history/delete")
