@@ -40,7 +40,12 @@ def create_app(engine: Engine) -> FastAPI:
     @asynccontextmanager
     async def _lifespan(_: FastAPI):
         state["loop"] = asyncio.get_running_loop()
+        # LETCHACK_WATCH=1 (or a prior enable): the watcher must actually run,
+        # not just report Stop-watching in the HUD.
+        if engine.watch_on and state["watcher"] is None:
+            _start_watcher()
         yield
+        _stop_watcher()
 
     app = FastAPI(title="Let'shack Bouncer", version="0.2.0", lifespan=_lifespan)
     state: dict[str, Any] = {"watcher": None, "loop": None}
@@ -103,7 +108,12 @@ def create_app(engine: Engine) -> FastAPI:
         title = str(body.get("title", "")).strip()
         if not title:
             raise HTTPException(422, "goal title required")
-        minutes = int(body.get("minutes", 30) or 30)
+        raw_minutes = body.get("minutes", 30)
+        # typed: rejects "abc" with 422 (not a 500 crash) and preserves a
+        # valid zero-minute demo goal (no `or 30` coercion)
+        if isinstance(raw_minutes, bool) or not isinstance(raw_minutes, (int, float)):
+            raise HTTPException(422, "minutes must be a number")
+        minutes = int(raw_minutes)
         difficulty = str(body.get("difficulty", "easy")).lower()
         if difficulty not in ("easy", "medium", "hard"):
             difficulty = "easy"
@@ -125,7 +135,8 @@ def create_app(engine: Engine) -> FastAPI:
 
     @app.post("/api/watch")
     def api_watch(body: dict[str, Any]) -> dict[str, Any]:
-        on = bool(body.get("on", False))
+        # strict boolean: the string "false" must not switch watching on
+        on = body.get("on", False) is True
         if on:
             if engine.source is None:
                 # real capture only; raises with fix instructions on Wayland

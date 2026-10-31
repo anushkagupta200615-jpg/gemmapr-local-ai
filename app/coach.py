@@ -94,7 +94,9 @@ class Coach:
     ) -> NegotiationOutcome:
         system = persona_system_prompt(strictness, goals, self.case_file(store))
         payload = self.provider.bouncer_turn(system, history or [], user_message)
-        concede = bool(payload.get("concede", False))
+        # Strict JSON contract: concede is a boolean. A model or client that
+        # replies with the string "false" must NOT unlock the gate.
+        concede = payload.get("concede", False) is True
         message = str(payload.get("message", ""))[:600]
         chore = ""
         if not concede:

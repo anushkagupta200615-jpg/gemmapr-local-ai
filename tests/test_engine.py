@@ -110,6 +110,43 @@ def test_short_focus_block_is_not_rewarded(tmp_path):
     assert store.xp_total() == 0
 
 
+def test_capture_outage_does_not_award_xp_for_unobserved_time(tmp_path, monkeypatch):
+    """A failed capture bridges unobserved minutes — the focus block must be
+    invalidated so the next non-work verdict can't complete a goal with time
+    the System never saw."""
+    engine, store = make_engine(
+        ["VS Code - engine.py", "Spotify - Chill mix"], tmp_path
+    )
+    store.add_goal("Essay", minutes=1, difficulty="medium")
+    engine.tick(now=100.0)  # on_track → focus block starts
+
+    # capture fails once (e.g. display hiccup): unknown gap, then recovers
+    real_capture = engine.source.capture
+
+    def flaky(goals=None):
+        raise RuntimeError("capture failed")
+
+    monkeypatch.setattr(engine.source, "capture", flaky)
+    with pytest.raises(RuntimeError):
+        engine.tick(now=190.0)
+    engine.note_capture_failure()  # what WatchThread does on failure
+    assert engine._on_track_start is None
+
+    # next successful capture is a break: the unseen gap must not earn XP
+    monkeypatch.setattr(engine.source, "capture", real_capture)
+    engine.tick(now=250.0)
+    assert store.xp_total() == 0
+    # the goal is NOT completed by unobserved time
+    assert len(store.goals(include_done=False)) == 1
+
+
+def test_note_capture_failure_is_a_noop_without_active_focus(tmp_path):
+    engine, _ = make_engine(["VS Code - engine.py"], tmp_path)
+    engine._on_track_start = None
+    engine.note_capture_failure()
+    assert engine._on_track_start is None  # stays None, no crash
+
+
 def test_verdicts_land_in_store_with_provider_name(tmp_path):
     engine, store = make_engine(["VS Code - main.py"], tmp_path)
     store.add_goal("Essay", minutes=30, difficulty="medium")

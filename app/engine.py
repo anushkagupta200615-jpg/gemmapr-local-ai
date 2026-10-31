@@ -69,6 +69,12 @@ class Engine:
         self._emit({"type": "watch", "on": False})
         return {"watch": False}
 
+    def note_capture_failure(self) -> None:
+        """A failed capture period is UNOBSERVED time — it must never count
+        as focus. Invalidate the running focus block so a later verdict
+        cannot award XP for the gap the System never saw."""
+        self._on_track_start = None
+
     # -- one capture+classify cycle --
 
     def tick(self, now: float | None = None) -> dict[str, Any]:
@@ -205,7 +211,9 @@ class WatchThread(threading.Thread):
             try:
                 self.engine.tick()
             except Exception:
-                pass  # a failed capture must never kill the loop
+                # a failed capture must never kill the loop, and the minutes
+                # it would have bridged must never earn XP
+                self.engine.note_capture_failure()
 
     def stop(self) -> None:
         self._stop.set()
