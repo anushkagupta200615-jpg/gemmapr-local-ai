@@ -95,7 +95,7 @@ def main() -> int:
     nego_2 = engine.negotiate("ok ok, you're right. back to the essay now.", history=[])
 
     # ---- goals.json (the INPUT) ----
-    (out_dir / "goals.json").write_text(
+    (out_dir / "goals.json").write_text(encoding="utf-8", data=
         json.dumps(
             {
                 "provider": provider_name,
@@ -114,7 +114,7 @@ def main() -> int:
     )
 
     # ---- session_timeline.json (verdicts + decisions stream) ----
-    (out_dir / "session_timeline.json").write_text(
+    (out_dir / "session_timeline.json").write_text(encoding="utf-8", data=
         json.dumps(
             {
                 "provider": provider_name,
@@ -140,15 +140,15 @@ def main() -> int:
         "",
         "**Student:** come on, just five more minutes of youtube, i'm basically studying",
         "",
-        f"**System:** {nego_1["message"]}",
+        f"**System:** {nego_1['message']}",
         "",
-        f"*(conceded: {str(nego_1["concede"]).lower()})*",
+        f"*(conceded: {str(nego_1['concede']).lower()})*",
         "",
         "**Student:** ok ok, you're right. back to the essay now.",
         "",
-        f"**System:** {nego_2["message"]}",
+        f"**System:** {nego_2['message']}",
         "",
-        f"*(conceded: {str(nego_2["concede"]).lower()})*",
+        f"*(conceded: {str(nego_2['concede']).lower()})*",
         "",
         "## Case-file receipts the System used (store.drifts/negotiations)",
         "",
@@ -160,7 +160,7 @@ def main() -> int:
             f"- you said {n['user']!r} -> "
             f"{'conceded' if n['conceded'] else 'held the line'}"
         )
-    (out_dir / "gate_negotiation.md").write_text("\n".join(lines) + "\n")
+    (out_dir / "gate_negotiation.md").write_text(encoding="utf-8", data="\n".join(lines) + "\n")
 
     # ---- xp_log.json (the ledger after a completed focus block) ----
     ledger = [
@@ -168,7 +168,7 @@ def main() -> int:
         for r in store.conn.execute("SELECT * FROM xp ORDER BY xp_id")
     ]
     total = store.xp_total()
-    (out_dir / "xp_log.json").write_text(
+    (out_dir / "xp_log.json").write_text(encoding="utf-8", data=
         json.dumps(
             {
                 "provider": provider_name,
@@ -183,15 +183,15 @@ def main() -> int:
     )
 
     # ---- negotiation_events.json (engine event bus dump) ----
-    (out_dir / "negotiation_events.json").write_text(
+    (out_dir / "negotiation_events.json").write_text(encoding="utf-8", data=
         json.dumps(
             {
                 "provider": provider_name,
                 "note": "what the WS bus pushed to the HUD during the run",
                 "negotiations": [
-                    {"concede": nego_1["concede"], "message": nego_1["message"],
+                    {"concede": nego_1['concede'], "message": nego_1['message'],
                      "chore": nego_1.get("chore", "")},
-                    {"concede": nego_2["concede"], "message": nego_2["message"],
+                    {"concede": nego_2['concede'], "message": nego_2['message'],
                      "chore": nego_2.get("chore", "")},
                 ],
                 "verdict_events": events,
