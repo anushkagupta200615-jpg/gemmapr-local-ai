@@ -7,12 +7,15 @@ writes exactly what the engine recorded.
 
 On the dev box the provider is the deterministic MockProvider (no model is
 installed here, honestly labeled). On the stage laptop the same command with
-gemma4:e2b running produces the Gemma-voiced artifacts (issue #5):
+gemma4:e2b running keeps the deterministic verdicts (FakeSource frames are
+blank fixtures — nothing for a vision model to see) and lets the REAL model
+voice the negotiation turn (issue #5):
 
-    LETCHACK_MOCK=0 python examples/make_demo_artifacts.py   # real model
+    LETCHACK_MOCK=0 python examples/make_demo_artifacts.py   # real negotiation voice
     python examples/make_demo_artifacts.py                   # mock (CI-safe)
 
-Every artifact carries a provider line stating which voice produced it.
+Every artifact carries a provider line stating exactly which voice produced
+what — no part is presented as model-classified when it was not.
 """
 
 from __future__ import annotations
@@ -29,11 +32,34 @@ sys.path.insert(0, str(REPO))
 os.environ.setdefault("LETCHACK_MOCK", "1")
 
 from app.capture import FakeSource  # noqa: E402
-from app.classifier import MockProvider, OllamaProvider  # noqa: E402
+from app.classifier import MockProvider, OllamaProvider, VerdictProvider  # noqa: E402
 from app.config import Settings  # noqa: E402
 from app.engine import Engine  # noqa: E402
 from app.store import Store  # noqa: E402
 from app.xp import level_for  # noqa: E402
+
+
+class MockVerdictsGemmaNegotiation(VerdictProvider):
+    """Honest hybrid for the real-model artifact run.
+
+    FakeSource frames are blank-fixture images that carry the scripted label —
+    a real model has nothing to SEE there, so letting gemma4:e2b "judge" them
+    would be theatre. Verdicts therefore stay deterministic (mock rules on the
+    scripted labels); the REAL local gemma4:e2b voices the negotiation turn,
+    which is legitimately text-only.
+    """
+
+    name = "mock-verdicts + gemma4:e2b-negotiation"
+
+    def __init__(self, verdicts: MockProvider, negotiator: OllamaProvider):
+        self._verdicts = verdicts
+        self._negotiator = negotiator
+
+    def classify_frames(self, frames, goals):
+        return self._verdicts.classify_frames(frames, goals)
+
+    def bouncer_turn(self, system, history, user_message):
+        return self._negotiator.bouncer_turn(system, history, user_message)
 
 
 def main() -> int:
@@ -45,10 +71,16 @@ def main() -> int:
         provider = MockProvider()
         provider_name = "mock (deterministic rules; no model on this machine)"
     else:
-        provider = OllamaProvider(
-            model=settings.model, base_url=settings.ollama_base_url
+        provider = MockVerdictsGemmaNegotiation(
+            verdicts=MockProvider(),
+            negotiator=OllamaProvider(
+                model=settings.model, base_url=settings.ollama_base_url
+            ),
         )
-        provider_name = f"ollama:{settings.model} (real gemma4:e2b)"
+        provider_name = (
+            "hybrid: verdicts = mock rules on scripted-labelled BLANK-FIXTURE "
+            f"frames (never real screens) · negotiation voice = ollama:{settings.model}"
+        )
 
     store = Store(os.path.join(tmp, "session.db"))
     engine = Engine(
