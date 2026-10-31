@@ -1,0 +1,1 @@
+"""Let'shack app package."""
