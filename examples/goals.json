@@ -1,5 +1,5 @@
 {
-  "provider": "mock (deterministic rules; no model on this machine)",
+  "provider": "hybrid: verdicts = mock rules on scripted-labelled BLANK-FIXTURE frames (never real screens) \u00b7 negotiation voice = ollama:gemma4:e2b",
   "goals": [
     {
       "title": "Warm-up sprint: outline notes",

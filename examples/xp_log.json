@@ -1,10 +1,10 @@
 {
-  "provider": "mock (deterministic rules; no model on this machine)",
+  "provider": "hybrid: verdicts = mock rules on scripted-labelled BLANK-FIXTURE frames (never real screens) \u00b7 negotiation voice = ollama:gemma4:e2b",
   "allocator": "focus block completion: medium=25, easy=10, hard=60 + streak bonus (cap +10)",
   "ledger": [
     {
       "xp_id": 1,
-      "ts": 1793476727.699304,
+      "ts": 1793479616.6298742,
       "amount": 12,
       "reason": "focus block >= 0m (easy)"
     }

@@ -1,16 +1,16 @@
 {
-  "provider": "mock (deterministic rules; no model on this machine)",
+  "provider": "hybrid: verdicts = mock rules on scripted-labelled BLANK-FIXTURE frames (never real screens) \u00b7 negotiation voice = ollama:gemma4:e2b",
   "note": "what the WS bus pushed to the HUD during the run",
   "negotiations": [
     {
       "concede": false,
-      "message": "No. The receipts say otherwise \u2014 the first block is half an hour. Begin.",
+      "message": "Your goal is to finish the essay introduction, which has a 30-minute time limit. Please stop the YouTube session now and focus on completing that section. Your next step is to write the next paragraph of your introduction.",
       "chore": "Wash the dishes in the sink"
     },
     {
-      "concede": true,
-      "message": "Apology accepted. Eyes on the goal \u2014 25 minutes, then we talk.",
-      "chore": ""
+      "concede": false,
+      "message": "You acknowledged the need to focus on the essay introduction. Now is the time to dedicate your full attention to completing that section. Focus on drafting the next logical paragraph to move the introduction forward.",
+      "chore": "20 minutes of desk/file cleanup"
     }
   ],
   "verdict_events": [
@@ -114,13 +114,14 @@
     {
       "type": "negotiation",
       "concede": false,
-      "message": "No. The receipts say otherwise \u2014 the first block is half an hour. Begin.",
+      "message": "Your goal is to finish the essay introduction, which has a 30-minute time limit. Please stop the YouTube session now and focus on completing that section. Your next step is to write the next paragraph of your introduction.",
       "chore": "Wash the dishes in the sink"
     },
     {
       "type": "negotiation",
-      "concede": true,
-      "message": "Apology accepted. Eyes on the goal \u2014 25 minutes, then we talk."
+      "concede": false,
+      "message": "You acknowledged the need to focus on the essay introduction. Now is the time to dedicate your full attention to completing that section. Focus on drafting the next logical paragraph to move the introduction forward.",
+      "chore": "20 minutes of desk/file cleanup"
     }
   ]
 }
