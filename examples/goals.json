@@ -1,0 +1,20 @@
+{
+  "provider": "mock (deterministic rules; no model on this machine)",
+  "goals": [
+    {
+      "title": "Warm-up sprint: outline notes",
+      "minutes": 0,
+      "difficulty": "easy"
+    },
+    {
+      "title": "Finish essay introduction",
+      "minutes": 30,
+      "difficulty": "medium"
+    },
+    {
+      "title": "Clean up project notes",
+      "minutes": 15,
+      "difficulty": "easy"
+    }
+  ]
+}

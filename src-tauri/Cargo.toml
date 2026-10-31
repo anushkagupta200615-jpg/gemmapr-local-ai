@@ -1,0 +1,16 @@
+[package]
+name = "letshack-bouncer"
+version = "0.2.0"
+edition = "2021"
+description = "Bouncer shell over the local accountability engine (see app/)"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+strip = true

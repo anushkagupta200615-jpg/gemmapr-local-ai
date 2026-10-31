@@ -37,23 +37,32 @@ class MockProvider(VerdictProvider):
     def bouncer_turn(
         self, system: str, history: list[dict[str, str]], user_message: str
     ) -> dict[str, Any]:
-        """Deterministic concession rules mirroring the persona contract."""
+        """Deterministic concession rules mirroring the persona contract.
+
+        Word-token matching: "basically" must not unlock the "call" emergency
+        route the way substring matching did.
+        """
+        import re
+
         msg = user_message.lower().strip()
-        if any(k in msg for k in ("done", "finished", "completed", "submitted", "cleaned")):
+        tokens = set(re.split(r"\W+", msg))
+        if tokens & {"done", "finished", "completed", "submitted", "cleaned"}:
             concede, reply = True, "Verified. XP logged. Next goal loads on your command."
-        elif any(k in msg for k in ("emergency", "appointment", "call", "errand")):
+        elif tokens & {"emergency", "appointment", "call", "errand"}:
             concede, reply = True, "Approved — a real-world errand outranks the System. Return after."
-        elif any(k in msg for k in ("break", "coffee", "stretch", "rest")):
+        elif tokens & {"break", "coffee", "stretch", "rest", "nap"}:
             if self._persona_is_easy(system):
                 concede, reply = True, "Ten minutes. The timer is on your feed. Go."
             elif self._persona_is_hard(system):
                 concede, reply = False, "Breaks are earned. Finish the current block first."
             else:
                 concede, reply = True, "Structured break granted: 10 minutes, timer running."
-        elif any(k in msg for k in ("sorry", "you're right", "fair")):
+        elif "sorry" in tokens or "you're right" in msg or "fair" in tokens:
             concede, reply = True, "Apology accepted. Eyes on the goal — 25 minutes, then we talk."
         else:
-            concede, reply = False, "No. The receipts say otherwise — the first block is half an hour. Begin."
+            concede, reply = False, (
+                "No. The receipts say otherwise — the first block is half an hour. Begin."
+            )
         return {"concede": concede, "message": reply}
 
     @staticmethod
