@@ -3,19 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>THE GATE</title>
+<title>THE GATE — Bouncer Lockout</title>
 <link rel="stylesheet" href="/static/style.css">
 </head>
 <body data-page="gate">
 <main class="gate-screen">
   <div class="gate-head">🚪 THE GATE</div>
-  <div class="gate-sub">The System is holding your screen. Make your case.</div>
+  <div class="gate-sub">The System has captured your screen. State your case to the Bouncer.</div>
   <div id="chat" class="chat" aria-live="polite"></div>
-  <form id="say" class="row">
-    <input id="say-box" placeholder="Talk to the System…" autocomplete="off" required>
-    <button class="btn">Send</button>
+  <form id="say" class="row" style="width: min(720px, 94vw);">
+    <input id="say-box" placeholder="State your plea to the System..." autocomplete="off" required>
+    <button class="btn">Negotiate</button>
   </form>
-  <div class="gate-foot"><a href="/">← back to the HUD</a></div>
+  <div class="gate-foot"><a href="/">← Return to System HUD</a></div>
 </main>
 <script src="/static/app.js"></script>
 </body>
