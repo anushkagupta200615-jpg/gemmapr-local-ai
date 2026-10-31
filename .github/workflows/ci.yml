@@ -1,0 +1,35 @@
+# CI for Let'shack — runs on every PR and on main.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+
+      - name: Compile check
+        run: python -m compileall -q app tests
+
+      - name: Run tests (model-dependent tests skipped without Ollama)
+        run: pytest -q
+        env:
+          SKIP_MODEL_TESTS: "1"
+          LETCHACK_MODEL: "gemma4:e2b"
