@@ -1,6 +1,7 @@
 # Core app
 ollama>=0.3.0
-rich>=13.0.0
+mss>=9.0.0
+pillow>=10.0.0
 
 # Tests / dev
 -r requirements-dev.txt
